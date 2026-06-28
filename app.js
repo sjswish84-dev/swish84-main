@@ -3,74 +3,89 @@
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   const CELL = 48;
-  let W, H, cols, rows, nodes, offset = 0;
+  let W, H, cols, rows;
+
+  // Deterministic hash from grid coords — no random(), so no jerk on tile wrap
+  function hash(c, r, salt) {
+    return Math.abs(Math.sin(c * 127.1 + r * 311.7 + (salt || 0) * 74.3));
+  }
+
+  const NODE_COLORS = [
+    [0, 212, 255],    // cyan
+    [124, 58, 237],   // purple
+    [255, 0, 110],    // pink
+  ];
 
   function resize() {
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
-    cols = Math.ceil(W / CELL) + 2;
-    rows = Math.ceil(H / CELL) + 2;
-    buildNodes();
-  }
-
-  function buildNodes() {
-    nodes = [];
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        if (Math.random() < 0.18) {
-          nodes.push({ c, r, phase: Math.random() * Math.PI * 2, speed: 0.004 + Math.random() * 0.008 });
-        }
-      }
-    }
+    cols = Math.ceil(W / CELL) + 3;
+    rows = Math.ceil(H / CELL) + 3;
   }
 
   function draw(ts) {
     ctx.clearRect(0, 0, W, H);
-    offset = (ts * 0.012) % CELL;
 
-    // Grid lines
+    const scroll = ts * 0.012;
+    const offsetX = scroll % CELL;
+    const startC = Math.floor(scroll / CELL);
+    const startR = Math.floor(scroll / CELL);
+
+    // Vertical grid lines — cyan
     ctx.lineWidth = 0.5;
-    for (let c = 0; c < cols; c++) {
-      const x = c * CELL - offset;
-      const alpha = 0.028 + 0.012 * Math.sin(ts * 0.0003 + c * 0.3);
+    for (let dc = -1; dc <= cols; dc++) {
+      const x = dc * CELL - offsetX;
+      if (x < -CELL || x > W + CELL) continue;
+      const alpha = 0.025 + 0.012 * Math.sin(ts * 0.0003 + (startC + dc) * 0.3);
       ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, H);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     }
-    for (let r = 0; r < rows; r++) {
-      const y = r * CELL - offset;
-      const alpha = 0.018 + 0.008 * Math.sin(ts * 0.0002 + r * 0.4);
+
+    // Horizontal grid lines — purple
+    for (let dr = -1; dr <= rows; dr++) {
+      const y = dr * CELL - offsetX;
+      if (y < -CELL || y > H + CELL) continue;
+      const alpha = 0.018 + 0.008 * Math.sin(ts * 0.0002 + (startR + dr) * 0.4);
       ctx.strokeStyle = `rgba(124, 58, 237, ${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
-    // Glowing nodes at intersections
-    nodes.forEach(n => {
-      n.phase += n.speed;
-      const pulse = (Math.sin(n.phase) + 1) / 2;
-      const x = n.c * CELL - offset;
-      const y = n.r * CELL - offset;
-      const radius = 1.5 + pulse * 2;
-      const alpha = 0.15 + pulse * 0.55;
+    // Nodes — presence, color, and pulse all derived from absolute grid coords
+    for (let dc = -1; dc <= cols; dc++) {
+      for (let dr = -1; dr <= rows; dr++) {
+        const absC = startC + dc;
+        const absR = startR + dr;
 
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, radius * 4);
-      grad.addColorStop(0, `rgba(0, 212, 255, ${alpha})`);
-      grad.addColorStop(1, `rgba(0, 212, 255, 0)`);
-      ctx.beginPath();
-      ctx.arc(x, y, radius * 4, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
+        if (hash(absC, absR, 0) < 0.82) continue; // ~18% of intersections
 
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0, 212, 255, ${alpha})`;
-      ctx.fill();
-    });
+        const x = dc * CELL - offsetX;
+        const y = dr * CELL - offsetX;
+        if (x < -CELL || x > W + CELL || y < -CELL || y > H + CELL) continue;
+
+        const basePhase = hash(absC, absR, 1) * Math.PI * 2;
+        const speed = 0.004 + hash(absC, absR, 2) * 0.008;
+        const pulse = (Math.sin(basePhase + ts * speed) + 1) / 2;
+
+        const colorIdx = Math.floor(hash(absC, absR, 3) * NODE_COLORS.length);
+        const [r, g, b] = NODE_COLORS[colorIdx];
+
+        const radius = 1.5 + pulse * 2;
+        const alpha = 0.15 + pulse * 0.55;
+
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius * 5);
+        grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+        grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 5, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.fill();
+      }
+    }
 
     requestAnimationFrame(draw);
   }
