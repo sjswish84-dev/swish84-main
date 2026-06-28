@@ -110,7 +110,7 @@
 /* ── Supabase Client ── */
 const { createClient } = supabase;
 const db = createClient(
-  'https://dfbjgoyaujlbwrptjzoxs.supabase.co',
+  'https://dfbjgoyaujlbwrptzoxs.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmYmpnb3lhdWpsYndycHR6b3hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDc0MDAsImV4cCI6MjA5ODE4MzQwMH0.wcs6Q5XgeW3PjUrU30y4yV1ljKofYgVgCc7dy-Fodak'
 );
 
