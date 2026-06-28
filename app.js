@@ -11,7 +11,7 @@
   }
 
   const NODE_COLORS = [
-    [0, 210, 180],    // teal
+    [0, 212, 255],    // cyan-teal matching hero
     [160, 60, 255],   // purple
     [255, 60, 180],   // pink
   ];
