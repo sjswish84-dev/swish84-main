@@ -107,49 +107,56 @@
 })();
 
 
+/* ── Supabase Client ── */
+const { createClient } = supabase;
+const db = createClient(
+  'https://dfbjgoyaujlbwrptjzoxs.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmYmpnb3lhdWpsYndycHR6b3hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDc0MDAsImV4cCI6MjA5ODE4MzQwMH0.wcs6Q5XgeW3PjUrU30y4yV1ljKofYgVgCc7dy-Fodak'
+);
+
 /* ── TIL App ── */
-function loadEntries() {
-  return JSON.parse(localStorage.getItem('til-entries') || '[]');
+let currentEntries = [];
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function saveEntries(entries) {
-  localStorage.setItem('til-entries', JSON.stringify(entries));
-}
-
-function renderEntries() {
+async function renderEntries() {
   const list = document.getElementById('entry-list');
-  const entries = loadEntries();
+  list.innerHTML = '<p class="empty">Loading...</p>';
 
-  if (entries.length === 0) {
+  const { data, error } = await db.from('entries').select('*').order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = '<p class="empty">Error loading entries. Check your connection.</p>';
+    return;
+  }
+
+  currentEntries = data || [];
+
+  if (currentEntries.length === 0) {
     list.innerHTML = '<p class="empty">No entries yet — add your first one above!</p>';
     return;
   }
 
-  list.innerHTML = entries
-    .slice()
-    .reverse()
-    .map((e, reversedIndex) => {
-      const realIndex = entries.length - 1 - reversedIndex;
-      return `
-        <div class="entry-card" id="card-${realIndex}">
-          <div class="entry-card-header">
-            <div class="topic">
-              <span class="topic-pill">${e.topic}</span>
-            </div>
-            <div class="card-actions">
-              <button class="btn-edit" onclick="startEdit(${realIndex})">Edit</button>
-              <button class="btn-delete" onclick="deleteEntry(${realIndex})">Delete</button>
-            </div>
-          </div>
-          <div class="note">${e.note}</div>
-          <div class="date">${e.date}</div>
+  list.innerHTML = currentEntries.map(e => `
+    <div class="entry-card" id="card-${e.id}">
+      <div class="entry-card-header">
+        <div class="topic">
+          <span class="topic-pill">${esc(e.topic)}</span>
         </div>
-      `;
-    })
-    .join('');
+        <div class="card-actions">
+          <button class="btn-edit" onclick="startEdit('${e.id}')">Edit</button>
+          <button class="btn-delete" onclick="deleteEntry('${e.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="note">${esc(e.note)}</div>
+      <div class="date">${esc(e.date)}</div>
+    </div>
+  `).join('');
 }
 
-function addEntry() {
+async function addEntry() {
   const topic = document.getElementById('topic').value.trim();
   const note = document.getElementById('note').value.trim();
 
@@ -158,58 +165,51 @@ function addEntry() {
     return;
   }
 
-  const entries = loadEntries();
-  entries.push({
-    topic,
-    note,
-    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  });
-  saveEntries(entries);
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const { error } = await db.from('entries').insert([{ topic, note, date }]);
+
+  if (error) {
+    alert('Error saving entry.');
+    return;
+  }
 
   document.getElementById('topic').value = '';
   document.getElementById('note').value = '';
-
   renderEntries();
 }
 
-function deleteEntry(index) {
+async function deleteEntry(id) {
   if (!confirm('Delete this entry?')) return;
-  const entries = loadEntries();
-  entries.splice(index, 1);
-  saveEntries(entries);
+  await db.from('entries').delete().eq('id', id);
   renderEntries();
 }
 
-function startEdit(index) {
-  const entries = loadEntries();
-  const e = entries[index];
-  const card = document.getElementById(`card-${index}`);
+function startEdit(id) {
+  const e = currentEntries.find(e => e.id === id);
+  const card = document.getElementById(`card-${id}`);
 
   card.innerHTML = `
     <div class="edit-form">
-      <input type="text" id="edit-topic-${index}" value="${e.topic}" />
-      <textarea id="edit-note-${index}">${e.note}</textarea>
+      <input type="text" id="edit-topic-${id}" value="${esc(e.topic)}" />
+      <textarea id="edit-note-${id}">${esc(e.note)}</textarea>
       <div class="edit-actions">
         <button class="btn-cancel" onclick="renderEntries()">Cancel</button>
-        <button class="btn-save" onclick="saveEdit(${index})">Save</button>
+        <button class="btn-save" onclick="saveEdit('${id}')">Save</button>
       </div>
     </div>
   `;
 }
 
-function saveEdit(index) {
-  const topic = document.getElementById(`edit-topic-${index}`).value.trim();
-  const note = document.getElementById(`edit-note-${index}`).value.trim();
+async function saveEdit(id) {
+  const topic = document.getElementById(`edit-topic-${id}`).value.trim();
+  const note = document.getElementById(`edit-note-${id}`).value.trim();
 
   if (!topic || !note) {
     alert('Please fill in both fields.');
     return;
   }
 
-  const entries = loadEntries();
-  entries[index].topic = topic;
-  entries[index].note = note;
-  saveEntries(entries);
+  await db.from('entries').update({ topic, note }).eq('id', id);
   renderEntries();
 }
 
