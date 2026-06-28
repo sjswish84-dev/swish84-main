@@ -69,20 +69,31 @@
         const colorIdx = ((absC * 2 + absR * 3) % 3 + 3) % 3;
         const [r, g, b] = NODE_COLORS[colorIdx];
 
-        const radius = 1.5 + pulse * 2;
-        const alpha = 0.15 + pulse * 0.55;
+        const size = 1 + pulse * 1.5;
+        const alpha = 0.2 + pulse * 0.7;
+        const arm = size * 5;
 
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius * 5);
-        grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
-        grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        // cross arms
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.5})`;
+        ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.arc(x, y, radius * 5, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
+        ctx.moveTo(x - arm, y); ctx.lineTo(x + arm, y);
+        ctx.moveTo(x, y - arm); ctx.lineTo(x, y + arm);
+        ctx.stroke();
+
+        // soft glow behind star
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, arm * 2);
+        glow.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.3})`);
+        glow.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        ctx.beginPath();
+        ctx.arc(x, y, arm * 2, 0, Math.PI * 2);
+        ctx.fillStyle = glow;
         ctx.fill();
 
+        // bright white center
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.fill();
       }
     }
