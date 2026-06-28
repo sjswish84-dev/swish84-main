@@ -11,9 +11,9 @@
   }
 
   const NODE_COLORS = [
-    [0, 212, 255],    // cyan
-    [124, 58, 237],   // purple
-    [255, 0, 110],    // pink
+    [0, 210, 180],    // teal
+    [160, 60, 255],   // purple
+    [255, 60, 180],   // pink
   ];
 
   function resize() {
@@ -63,10 +63,10 @@
         if (x < -CELL || x > W + CELL || y < -CELL || y > H + CELL) continue;
 
         const basePhase = hash(absC, absR, 1) * Math.PI * 2;
-        const speed = 0.004 + hash(absC, absR, 2) * 0.008;
+        const speed = 0.001 + hash(absC, absR, 2) * 0.002;
         const pulse = (Math.sin(basePhase + ts * speed) + 1) / 2;
 
-        const colorIdx = Math.floor(hash(absC, absR, 3) * NODE_COLORS.length);
+        const colorIdx = ((absC * 2 + absR * 3) % 3 + 3) % 3;
         const [r, g, b] = NODE_COLORS[colorIdx];
 
         const radius = 1.5 + pulse * 2;
