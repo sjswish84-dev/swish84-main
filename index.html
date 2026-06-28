@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Today I Learned</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Today I Learned</h1>
+    <p class="subtitle">A running log of things I'm picking up along the way.</p>
+  </header>
+
+  <main>
+    <section class="add-entry">
+      <h2>Add a New Entry</h2>
+      <input type="text" id="topic" placeholder="Topic (e.g. Git, VS Code)" />
+      <textarea id="note" placeholder="What did you learn?"></textarea>
+      <button onclick="addEntry()">Save Entry</button>
+    </section>
+
+    <section class="entries">
+      <h2>My Entries</h2>
+      <div id="entry-list"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
