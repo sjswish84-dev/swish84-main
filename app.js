@@ -270,13 +270,9 @@ function _trackHTML(track) {
     + '<a class="track-name" href="' + esc(track.trackUrl) + '" target="_blank" rel="noopener">' + esc(track.name) + '</a>'
     + '<a class="track-artist" href="' + esc(track.artistUrl) + '" target="_blank" rel="noopener">' + esc(track.artist) + '</a>'
     + '</div>'
-    + '<div class="track-controls">'
-    + (track.previewUrl
-      ? '<button class="btn-play" data-preview="' + esc(track.previewUrl) + '" onclick="togglePlay(this)">' + _playIcon() + '</button>'
-      : '')
     + '<a class="btn-sp-ext" href="' + esc(track.trackUrl) + '" target="_blank" rel="noopener" title="Open on Spotify">' + _spIcon(13) + '</a>'
     + '</div>'
-    + '</div>';
+    + '<iframe class="sp-embed" src="https://open.spotify.com/embed/track/' + esc(track.id) + '?utm_source=generator&theme=0" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
 }
 
 document.addEventListener('click', e => {
