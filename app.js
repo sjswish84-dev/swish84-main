@@ -78,7 +78,7 @@
 
 /* ── Spotify ── */
 const SPOTIFY_CLIENT_ID = '866ab5a708b044e89ae4c28c2fe4081c';
-const SPOTIFY_REDIRECT_URI = location.origin + location.pathname;
+const SPOTIFY_REDIRECT_URI = 'https://sjswish84-dev.github.io/swish84-main/';
 
 let spotifyToken = null;
 let selectedTrack = null; // track attached to the currently open add/edit form
