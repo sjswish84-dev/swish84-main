@@ -25,6 +25,16 @@
       <h2><span class="section-icon">+</span> New Entry</h2>
       <input type="text" id="topic" placeholder="Topic (e.g. Git, VS Code, Claude)" />
       <textarea id="note" placeholder="What did you learn?"></textarea>
+      <div class="spotify-row">
+        <button id="spotify-connect-btn" class="btn-spotify-connect" onclick="loginSpotify()">Connect Spotify</button>
+        <div id="track-search-area" style="display:none">
+          <div class="track-search-wrap">
+            <input id="add-track-search" type="text" placeholder="♫  What are you listening to?" oninput="onTrackSearch(event,'add')" autocomplete="off" />
+            <div id="add-track-dropdown" class="track-dropdown"></div>
+          </div>
+          <div id="add-selected-track"></div>
+        </div>
+      </div>
       <button onclick="addEntry()">Save Entry →</button>
     </section>
 
