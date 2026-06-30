@@ -285,6 +285,13 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function _formatDate(ts) {
+  const d = new Date(ts);
+  const date = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles', timeZoneName: 'short' });
+  return date + ' · ' + time;
+}
+
 async function renderEntries() {
   const list = document.getElementById('entry-list');
   list.innerHTML = '<p class="empty">Loading...</p>';
@@ -316,7 +323,7 @@ async function renderEntries() {
       </div>
       <div class="note">${esc(e.note)}</div>
       ${e.track ? _trackHTML(e.track) : ''}
-      <div class="date">${esc(e.date)}</div>
+      <div class="date">${_formatDate(e.created_at)}</div>
     </div>
   `).join('');
 }
