@@ -262,17 +262,7 @@ function _spIcon(size) {
 
 function _trackHTML(track) {
   if (!track) return '';
-  return '<div class="track-player">'
-    + '<a href="' + esc(track.trackUrl) + '" target="_blank" rel="noopener">'
-    + '<img class="track-art" src="' + esc(track.albumArt) + '" alt="">'
-    + '</a>'
-    + '<div class="track-info">'
-    + '<a class="track-name" href="' + esc(track.trackUrl) + '" target="_blank" rel="noopener">' + esc(track.name) + '</a>'
-    + '<a class="track-artist" href="' + esc(track.artistUrl) + '" target="_blank" rel="noopener">' + esc(track.artist) + '</a>'
-    + '</div>'
-    + '<a class="btn-sp-ext" href="' + esc(track.trackUrl) + '" target="_blank" rel="noopener" title="Open on Spotify">' + _spIcon(13) + '</a>'
-    + '</div>'
-    + '<iframe class="sp-embed" src="https://open.spotify.com/embed/track/' + esc(track.id) + '?utm_source=generator&theme=0" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
+  return '<iframe class="sp-embed" src="https://open.spotify.com/embed/track/' + esc(track.id) + '?utm_source=generator&theme=0" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
 }
 
 document.addEventListener('click', e => {
