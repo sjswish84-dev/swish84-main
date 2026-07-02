@@ -278,6 +278,84 @@ const db = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmYmpnb3lhdWpsYndycHR6b3hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDc0MDAsImV4cCI6MjA5ODE4MzQwMH0.wcs6Q5XgeW3PjUrU30y4yV1ljKofYgVgCc7dy-Fodak'
 );
 
+/* ── Auth ── */
+const OWNER_EMAIL = 'sjswish84@gmail.com';
+let currentUser = null;
+
+function isOwner() {
+  return !!currentUser && currentUser.email === OWNER_EMAIL;
+}
+
+function openLoginModal() {
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-modal').style.display = 'flex';
+  document.getElementById('login-email').focus();
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal').style.display = 'none';
+}
+
+async function submitLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+
+  if (!email || !password) {
+    errEl.textContent = 'Enter email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error) {
+    errEl.textContent = 'Sign in failed. Check your credentials.';
+    errEl.style.display = 'block';
+    return;
+  }
+  closeLoginModal();
+}
+
+async function logout() {
+  await db.auth.signOut();
+}
+
+function updateAuthUI() {
+  const widget = document.getElementById('auth-widget');
+  if (isOwner()) {
+    widget.innerHTML = '<div class="auth-status"><span class="owner-email">' + esc(currentUser.email) + '</span>'
+      + '<button class="btn-signout" onclick="logout()">Sign out</button></div>';
+    document.body.classList.add('is-owner');
+  } else {
+    widget.innerHTML = '';
+    document.body.classList.remove('is-owner');
+  }
+}
+
+function checkLoginHash() {
+  if (location.hash === '#login') {
+    history.replaceState({}, '', location.pathname + location.search);
+    openLoginModal();
+  }
+}
+window.addEventListener('hashchange', checkLoginHash);
+
+async function initAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  currentUser = session?.user || null;
+  updateAuthUI();
+  renderEntries();
+  checkLoginHash();
+
+  db.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    updateAuthUI();
+    renderEntries();
+  });
+}
+
 /* ── TIL App ── */
 let currentEntries = [];
 
@@ -316,10 +394,12 @@ async function renderEntries() {
         <div class="topic">
           <span class="topic-pill">${esc(e.topic)}</span>
         </div>
+        ${isOwner() ? `
         <div class="card-actions">
           <button class="btn-edit" onclick="startEdit('${e.id}')">Edit</button>
           <button class="btn-delete" onclick="deleteEntry('${e.id}')">Delete</button>
         </div>
+        ` : ''}
       </div>
       <div class="note">${esc(e.note)}</div>
       ${e.track ? _trackHTML(e.track) : ''}
@@ -329,6 +409,7 @@ async function renderEntries() {
 }
 
 async function addEntry() {
+  if (!isOwner()) return;
   const topic = document.getElementById('topic').value.trim();
   const note = document.getElementById('note').value.trim();
 
@@ -353,12 +434,14 @@ async function addEntry() {
 }
 
 async function deleteEntry(id) {
+  if (!isOwner()) return;
   if (!confirm('Delete this entry?')) return;
   await db.from('entries').delete().eq('id', id);
   renderEntries();
 }
 
 function startEdit(id) {
+  if (!isOwner()) return;
   const e = currentEntries.find(e => e.id === id);
   _savedAddTrack = selectedTrack;
   selectedTrack = e.track || null;
@@ -392,6 +475,7 @@ function cancelEdit() {
 }
 
 async function saveEdit(id) {
+  if (!isOwner()) return;
   const topic = document.getElementById(`edit-topic-${id}`).value.trim();
   const note = document.getElementById(`edit-note-${id}`).value.trim();
 
@@ -406,5 +490,5 @@ async function saveEdit(id) {
   renderEntries();
 }
 
+initAuth();
 initSpotify();
-renderEntries();

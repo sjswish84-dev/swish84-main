@@ -88,6 +88,85 @@ header h1 {
   font-weight: 400;
 }
 
+/* ── Auth Widget ── */
+.auth-widget {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 2;
+}
+
+.auth-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: #4a5568;
+}
+.auth-status .owner-email { color: #00d4ff; font-weight: 600; }
+
+.btn-signout {
+  background: none;
+  color: #ff006e;
+  border: 1px solid #ff006e33;
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  align-self: auto;
+}
+.btn-signout:hover { background: #ff006e18; box-shadow: 0 0 12px #ff006e22; transform: none; }
+
+/* ── Login Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 3, 8, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: #0e0e1e;
+  border: 1px solid #ffffff14;
+  border-radius: 16px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal-box h3 {
+  color: #e0e0f0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.login-error {
+  color: #ff006e;
+  font-size: 0.8rem;
+}
+
+/* Hidden until an authenticated owner session is confirmed.
+   Specificity bumped via `body` ancestor so this reliably beats
+   later, equally-specific single-class rules like `.add-entry`. */
+body .owner-only { display: none; }
+body.is-owner .owner-only { display: flex; }
+
 /* ── Layout ── */
 main {
   position: relative;

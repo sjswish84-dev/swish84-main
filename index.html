@@ -13,6 +13,7 @@
   <canvas id="bg-canvas"></canvas>
 
   <header>
+    <div class="auth-widget" id="auth-widget"></div>
     <div class="header-inner">
       <div class="header-badge">✦ AI learning log</div>
       <h1>Today I Learned</h1>
@@ -20,8 +21,21 @@
     </div>
   </header>
 
+  <div id="login-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <h3>Sign in</h3>
+      <input type="email" id="login-email" placeholder="Email" autocomplete="username" />
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') submitLogin()" />
+      <div id="login-error" class="login-error" style="display:none"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeLoginModal()">Cancel</button>
+        <button class="btn-save" onclick="submitLogin()">Sign in</button>
+      </div>
+    </div>
+  </div>
+
   <main>
-    <section class="add-entry">
+    <section class="add-entry owner-only" id="add-entry-section">
       <h2><span class="section-icon">+</span> New Entry</h2>
       <input type="text" id="topic" placeholder="Topic (e.g. Git, VS Code, Claude)" />
       <textarea id="note" placeholder="What did you learn?"></textarea>
