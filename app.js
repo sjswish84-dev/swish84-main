@@ -322,10 +322,59 @@ async function logout() {
   await db.auth.signOut();
 }
 
+async function requestPasswordReset() {
+  const email = document.getElementById('login-email').value.trim();
+  const errEl = document.getElementById('login-error');
+
+  if (!email) {
+    errEl.textContent = 'Enter your email above first, then click "Forgot password?".';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const redirectTo = location.origin + location.pathname;
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) {
+    errEl.textContent = 'Could not send reset email.';
+    errEl.style.display = 'block';
+    return;
+  }
+  closeLoginModal();
+  alert('Check your email for a password reset link.');
+}
+
+function openResetPasswordModal() {
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-error').style.display = 'none';
+  document.getElementById('reset-password-modal').style.display = 'flex';
+  document.getElementById('reset-password').focus();
+}
+
+async function submitNewPassword() {
+  const password = document.getElementById('reset-password').value;
+  const errEl = document.getElementById('reset-error');
+
+  if (!password || password.length < 12) {
+    errEl.textContent = 'Password must be at least 12 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const { error } = await db.auth.updateUser({ password });
+  if (error) {
+    errEl.textContent = 'Could not update password: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  document.getElementById('reset-password-modal').style.display = 'none';
+  alert('Password updated — you are now signed in.');
+}
+
 function updateAuthUI() {
   const widget = document.getElementById('auth-widget');
   if (isOwner()) {
     widget.innerHTML = '<div class="auth-status"><span class="owner-email">' + esc(currentUser.email) + '</span>'
+      + '<button class="btn-signout" onclick="openResetPasswordModal()">Change password</button>'
       + '<button class="btn-signout" onclick="logout()">Sign out</button></div>';
     document.body.classList.add('is-owner');
   } else {
@@ -349,10 +398,13 @@ async function initAuth() {
   renderEntries();
   checkLoginHash();
 
-  db.auth.onAuthStateChange((_event, session) => {
+  db.auth.onAuthStateChange((event, session) => {
     currentUser = session?.user || null;
     updateAuthUI();
     renderEntries();
+    if (event === 'PASSWORD_RECOVERY') {
+      openResetPasswordModal();
+    }
   });
 }
 

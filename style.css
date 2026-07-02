@@ -156,6 +156,18 @@ header h1 {
   gap: 0.5rem;
 }
 
+.btn-forgot {
+  align-self: center;
+  background: none;
+  border: none;
+  color: #4a5568;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.2rem;
+  text-decoration: underline;
+}
+.btn-forgot:hover { color: #00d4ff; box-shadow: none; transform: none; }
+
 .login-error {
   color: #ff006e;
   font-size: 0.8rem;

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' https: data:; media-src 'self' https:; frame-src https://open.spotify.com; connect-src 'self' https://dfbjgoyaujlbwrptzoxs.supabase.co https://accounts.spotify.com https://api.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>Today I Learned</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,6 +32,18 @@
         <button class="btn-cancel" onclick="closeLoginModal()">Cancel</button>
         <button class="btn-save" onclick="submitLogin()">Sign in</button>
       </div>
+      <button class="btn-forgot" onclick="requestPasswordReset()">Forgot password?</button>
+    </div>
+  </div>
+
+  <div id="reset-password-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <h3>Set a new password</h3>
+      <input type="password" id="reset-password" placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter') submitNewPassword()" />
+      <div id="reset-error" class="login-error" style="display:none"></div>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="submitNewPassword()">Save password</button>
+      </div>
     </div>
   </div>
 
@@ -58,7 +71,7 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js" integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9" crossorigin="anonymous"></script>
   <script src="app.js"></script>
 </body>
 </html>
